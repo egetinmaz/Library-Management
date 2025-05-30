@@ -4,11 +4,11 @@ from Library_Management import Book, User, Library
 
 def start_portal(library):
     window = tk.Tk()
-    window.title("Library System")
+    window.title("Library Management System")
     window.geometry("400x500")
 
     # --- Title ---
-    tk.Label(window, text="Library System", font=("Helvetica", 16, "bold")).pack(pady=10)
+    tk.Label(window, text="Library Management System", font=("Helvetica", 16, "bold")).pack(pady=10)
 
     # --- Book Fields ---
     tk.Label(window, text="Book ISBN").pack()

@@ -1,77 +1,61 @@
-import tkinter as tk
-from tkinter import messagebox
+import streamlit as st
 from Library_Management import Book, User, Library
 
-def start_portal(library):
-    window = tk.Tk()
-    window.title("Library Management System")
-    window.geometry("400x500")
+# Initialize the library object
+if "library" not in st.session_state:
+    st.session_state.library = Library("City Library")
 
-    # --- Title ---
-    tk.Label(window, text="Library Management System", font=("Helvetica", 16, "bold")).pack(pady=10)
+library = st.session_state.library
 
-    # --- Book Fields ---
-    tk.Label(window, text="Book ISBN").pack()
-    isbn_entry = tk.Entry(window)
-    isbn_entry.pack(pady=5)
+st.title("📚 Library Management System")
 
-    tk.Label(window, text="Book Title").pack()
-    title_entry = tk.Entry(window)
-    title_entry.pack(pady=5)
+# --- Book Fields ---
+st.subheader("Book Information")
+isbn = st.text_input("Book ISBN")
+title = st.text_input("Book Title")
+author = st.text_input("Book Author")
 
-    tk.Label(window, text="Book Author").pack()
-    author_entry = tk.Entry(window)
-    author_entry.pack(pady=5)
+# --- User Fields ---
+st.subheader("User Information")
+user_id = st.text_input("User ID")
+user_name = st.text_input("User Name")
 
-    # --- User Fields ---
-    tk.Label(window, text="User ID").pack()
-    user_id_entry = tk.Entry(window)
-    user_id_entry.pack(pady=5)
+# --- Actions ---
+col1, col2 = st.columns(2)
 
-    tk.Label(window, text="User Name").pack()
-    user_name_entry = tk.Entry(window)
-    user_name_entry.pack(pady=5)
+with col1:
+    if st.button("➕ Add Book"):
+        if not (isbn and title and author):
+            st.error("All book fields are required.")
+        else:
+            library.add_book(Book(title, author, isbn))
+            st.success(f"Book '{title}' added!")
 
-    # --- Actions ---
-    def add_book():
-        title = title_entry.get()
-        author = author_entry.get()
-        isbn = isbn_entry.get()
-        if not (title and author and isbn):
-            messagebox.showerror("Error", "All book fields are required.")
-            return
-        library.add_book(Book(title, author, isbn))
-        messagebox.showinfo("Success", f"Book '{title}' added!")
+    if st.button("👤 Add User"):
+        if not (user_id and user_name):
+            st.error("Both user fields are required.")
+        else:
+            library.add_user(User(user_id, user_name))
+            st.success(f"User '{user_name}' added!")
 
-    def add_user():
-        user_id = user_id_entry.get()
-        name = user_name_entry.get()
-        if not (user_id and name):
-            messagebox.showerror("Error", "Both user fields are required.")
-            return
-        library.add_user(User(user_id, name))
-        messagebox.showinfo("Success", f"User '{name}' added!")
+with col2:
+    if st.button("📖 Borrow Book"):
+        if not (isbn and user_id):
+            st.error("ISBN and User ID are required to borrow.")
+        else:
+            result = library.borrow_book(isbn, user_id)
+            st.info(result)
 
-    def borrow_book():
-        isbn = isbn_entry.get()
-        user_id = user_id_entry.get()
-        result = library.borrow_book(isbn, user_id)
-        messagebox.showinfo("Result", result)
+    if st.button("🔁 Return Book"):
+        if not (isbn and user_id):
+            st.error("ISBN and User ID are required to return.")
+        else:
+            result = library.return_book(isbn, user_id)
+            st.info(result)
 
-    def return_book():
-        isbn = isbn_entry.get()
-        user_id = user_id_entry.get()
-        result = library.return_book(isbn, user_id)
-        messagebox.showinfo("Result", result)
+# Optional: Show current books/users
+with st.expander("📚 View All Books"):
+    st.write(library.books)
 
-    # --- Buttons ---
-    tk.Button(window, text="Add Book", command=add_book).pack(pady=5)
-    tk.Button(window, text="Add User", command=add_user).pack(pady=5)
-    tk.Button(window, text="Borrow Book", command=borrow_book).pack(pady=5)
-    tk.Button(window, text="Return Book", command=return_book).pack(pady=5)
-
-    window.mainloop()
-
-if __name__ == "__main__":
-    my_library = Library("City Library")
-    start_portal(my_library)
+with st.expander("👥 View All Users"):
+    st.write(library.users)
